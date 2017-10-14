@@ -27,16 +27,16 @@ if __name__ == '__main__':
     
     print('Loading train data.')
     x_train, y_train = load_train_data(dataset)
-    (x_train, y_train), (x_valid, y_valid) = split_validation(x_train, y_train, valid_rate)
     input_dim = x_train.shape[2]
     output_dim = y_train.shape[2]
+    
+    x_train, y_train = torch.FloatTensor(x_train).cuda(), torch.FloatTensor(y_train).cuda()
 
-    # Convert data from numpy arrray to tensor
-    x_train, y_train = torch.FloatTensor(x_train), torch.FloatTensor(y_train)
+    (x_train, y_train), (x_valid, y_valid) = split_validation(x_train, y_train, valid_rate)
     x_valid, y_valid = Variable(torch.FloatTensor(x_valid)), Variable(torch.FloatTensor(y_valid))
 
     print('Initial RNN model.')
-    model = RNNModel(input_dim, output_dim)
+    model = RNNModel(input_dim, output_dim).cuda()
     optimizer = torch.optim.Adam(model.parameters())
     loss = torch.nn.BCELoss()
 

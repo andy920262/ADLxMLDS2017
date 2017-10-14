@@ -18,7 +18,7 @@ def load_phones_map():
     return phones_map
 
 def load_train_data(dataset):
-    return np.zeros((1000, 800, 39)), np.zeros((1000, 800, 49)) 
+    #return np.zeros((1000, 800, 39)), np.zeros((1000, 800, 49)) 
     feature_path = os.path.join('data/', dataset, 'train.ark')
     label_path = os.path.join('data/', 'label/', 'train.lab')
 
