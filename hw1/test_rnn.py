@@ -9,7 +9,7 @@ import pickle
 
 if __name__ == '__main__': 
     norm = pickle.load(open('norm.pkl', 'rb'))
-    x_test, test_id = load_test_data('mfcc')
+    x_test, test_id = load_test_data('mfcc', sys.argv[1])
     x_test = x_test / norm
     output = [] 
     
@@ -30,7 +30,7 @@ if __name__ == '__main__':
         y = encode(y)
         output += y
 
-    output_file = open('predict.csv', 'w')
+    output_file = open(sys.argv[2], 'w')
     print('id,phone_sequence', file=output_file)
     for i in range(len(output)):
         print('{},{}'.format(test_id[i], output[i]), file=output_file)
