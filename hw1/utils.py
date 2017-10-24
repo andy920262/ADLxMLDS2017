@@ -2,6 +2,7 @@ import os
 import numpy as np
 import editdistance
 import re
+from itertools import groupby
 phones_char={'':'','aa':'a','ae':'b','ah':'c','aw':'e','ay':'g','b':'h','ch':'i','d':'k','dh':'l','dx':'m','eh':'n','er':'r','ey':'s','f':'t','g':'u','hh':'v','ih':'w','iy':'y','jh':'z','k':'A','l':'B','m':'C','n':'D','ng':'E','ow':'F','oy':'G','p':'H','r':'I','s':'J','sh':'K','sil':'L','t':'M','th':'N','uh':'O','uw':'P','v':'Q','w':'S','y':'T','z':'U'}
 phones_48_39={'aa':'aa','ae':'ae','ah':'ah','ao':'aa','aw':'aw','ax':'ah','ay':'ay','b':'b','ch':'ch','cl':'sil','d':'d','dh':'dh','dx':'dx','eh':'eh','el':'l','en':'n','epi':'sil','er':'er','ey':'ey','f':'f','g':'g','hh':'hh','ih':'ih','ix':'ih','iy':'iy','jh':'jh','k':'k','l':'l','m':'m','ng':'ng','n':'n','ow':'ow','oy':'oy','p':'p','r':'r','sh':'sh','sil':'sil','s':'s','th':'th','t':'t','uh':'uh','uw':'uw','vcl':'sil','v':'v','w':'w','y':'y','zh':'sh','z':'z'}
 char_index={'':0,'a':1,'b':2,'c':3,'e':4,'g':5,'h':6,'i':7,'k':8,'l':9,'m':10,'n':11,'r':12,'s':13,'t':14,'u':15,'v':16,'w':17,'y':18,'z':19,'A':20,'B':21,'C':22,'D':23,'E':24,'F':25,'G':26,'H':27,'I':28,'J':29,'K':30,'L':31,'M':32,'N':33,'O':34,'P':35,'Q':36,'S':37,'T':38,'U':39}
@@ -37,6 +38,9 @@ def encode(x):
     ret = []
     for i in x:
         seq = ''.join([index_char[c] for c in i])
+        seq = [list(g) for k, g in groupby(seq)]
+        seq = [x[0] if len(x) > 2 else '' for x in seq]
+        seq = ''.join(seq)
         seq = re.sub(r'(.)\1+', r'\1', seq).strip('L')
         ret.append(seq)
     return ret

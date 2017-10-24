@@ -11,7 +11,7 @@ from torch.autograd import Variable
 from progressbar import ProgressBar, ETA, FormatLabel, Bar
 
 from utils import *
-from model import RNNModel
+from model import CNNModel
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--dataset', default='mfcc')
@@ -30,8 +30,8 @@ torch.manual_seed(87)
 if __name__ == '__main__':
     
     print('Loading train data.')
-    x_train, y_train = load_train_data(dataset)
-    #x_train, y_train = pickle.load(open('data.pkl', 'rb'))
+    #x_train, y_train = load_train_data(dataset)
+    x_train, y_train = pickle.load(open('data.pkl', 'rb'))
     norm = pickle.load(open('norm.pkl', 'rb'))
     x_train = x_train / norm
 
@@ -55,9 +55,9 @@ if __name__ == '__main__':
         num_workers=4
     )
         
-    print('Initial RNN model.')
-    model = RNNModel(input_dim, output_dim).cuda()
-    optimizer = torch.optim.RMSprop(model.parameters(), lr=0.0001, alpha=0.9)
+    print('Initial CNN model.')
+    model = CNNModel(input_dim, output_dim).cuda()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     loss_func = torch.nn.CrossEntropyLoss()
 
     print('Start training.')
@@ -133,6 +133,6 @@ if __name__ == '__main__':
             with open('model/model_best.pt'.format(best_ed), 'wb') as file:
                 torch.save(model.state_dict(), file)
 
-        if early_stop_cnt >= 10:
-            print('No improvement for 10 epochs. Stop training.')
+        if early_stop_cnt >= 20 and best_ed < 15:
+            print('No improvement for 20 epochs. Stop training.')
             break
