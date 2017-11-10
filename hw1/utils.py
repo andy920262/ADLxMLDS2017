@@ -8,6 +8,7 @@ phones_48_39={'aa':'aa','ae':'ae','ah':'ah','ao':'aa','aw':'aw','ax':'ah','ay':'
 char_index={'':0,'a':1,'b':2,'c':3,'e':4,'g':5,'h':6,'i':7,'k':8,'l':9,'m':10,'n':11,'r':12,'s':13,'t':14,'u':15,'v':16,'w':17,'y':18,'z':19,'A':20,'B':21,'C':22,'D':23,'E':24,'F':25,'G':26,'H':27,'I':28,'J':29,'K':30,'L':31,'M':32,'N':33,'O':34,'P':35,'Q':36,'S':37,'T':38,'U':39}
 index_char=['','a','b','c','e','g','h','i','k','l','m','n','r','s','t','u','v','w','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','S','T','U']
 
+'''
 def load_phones_map(): 
     phones_char = {'': ''}
     phones_48_39 = {}
@@ -31,7 +32,7 @@ def load_phones_map():
         char_index[char] = i
 
     return phones_char, phones_48_39, char_index, index_char
-
+'''
 #phones_char, phones_48_39, char_index, index_char = load_phones_map()
 
 def encode(x):
@@ -73,8 +74,8 @@ def load_label_data(path):
             label.append(line.replace('\n', '').split(','))
     return label
 
-def load_test_data(dataset):
-    path = os.path.join('data/', dataset, 'test.ark')
+def load_test_data(dataset, data_dir):
+    path = os.path.join(data_dir, dataset, 'test.ark')
     feature = load_feature_data(path)
     
     max_seql = 777
@@ -101,10 +102,10 @@ def load_test_data(dataset):
 
     return x_test, test_id
                 
-def load_train_data(dataset):
+def load_train_data(dataset, data_dir):
    
-    feature_path = os.path.join('data/', dataset, 'train.ark')
-    label_path = os.path.join('data/label', 'train.lab')
+    feature_path = os.path.join(data_dir, dataset, 'train.ark')
+    label_path = os.path.join(data_dir, 'label', 'train.lab')
 
     max_seql = 777
     

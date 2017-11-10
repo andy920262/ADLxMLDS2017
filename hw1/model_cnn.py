@@ -30,8 +30,8 @@ torch.manual_seed(87)
 if __name__ == '__main__':
     
     print('Loading train data.')
-    #x_train, y_train = load_train_data(dataset)
-    x_train, y_train = pickle.load(open('data.pkl', 'rb'))
+    x_train, y_train = load_train_data(dataset)
+    #x_train, y_train = pickle.load(open('data.pkl', 'rb'))
     norm = pickle.load(open('norm.pkl', 'rb'))
     x_train = x_train / norm
 
