@@ -1,41 +1,50 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.autograd import Variable
+import math
 
-    
-class S2VT(torch.nn.Module):
-    def __init__(self, input_size, output_size, hidden_size=256):
-        super(S2VT, self).__init__()
-        self.lstm1 = nn.LSTM(
+class Encoder(torch.nn.Module):
+    def __init__(self, input_size, hidden_size):
+        super(Encoder, self).__init__()
+        self.hidden_size = hidden_size
+        self.lstm = nn.LSTM(
                 input_size=input_size,
                 hidden_size=hidden_size,
                 num_layers=1,
-                batch_first=True)
-        self.lstm2 = nn.LSTM(
-                input_size=hidden_size,
+                batch_first=True,
+                dropout=0.2)
+
+    def forward(self, input, hidden):
+        output, hidden = self.lstm(input, hidden)
+        return output, hidden
+
+class Decoder(torch.nn.Module):
+    def __init__(self, hidden_size, output_size, n_layers=1):
+        super(Decoder, self).__init__()
+        self.hidden_size = hidden_size
+        self.lstm = nn.LSTM(
+                input_size=hidden_size * 2,
                 hidden_size=hidden_size,
                 num_layers=1,
-                batch_first=True)
-        self.output_layer = nn.Linear(hidden_size, output_size)
-        self.output_size = output_size
-
-    def forward(self, input):
-        batch_size = input.size(0)
-        dec_pad = Variable(torch.zeros(batch_size, 1, 4096)).cuda()
-
-        # Encode
-        lstm1_out, lstm1_hid = self.lstm1(input, None)
-        _, lstm2_hid = self.lstm2(lstm1_out, None)
-
-        # Decode
-        output = []
-        lstm1_out, lstm1_hid = self.lstm1(dec_pad, lstm1_hid)
-        lstm2_out = Variable(torch.zeros(batch_size, 1, 256)).cuda()
-        for i in range(40):
-            lstm1_out, lstm1_hid = self.lstm1(dec_pad, lstm1_hid)
-            lstm2_out, lstm2_hid = self.lstm2(lstm1_out + lstm2_out, lstm2_hid)
-            output += [lstm2_out]
+                batch_first=True,
+                dropout=0.2)
+        self.attn = nn.Linear(hidden_size, 80)
+        self.attn_c = nn.Linear(hidden_size * 2, hidden_size)
+        self.out = nn.Linear(hidden_size, output_size)
+        self.emb = nn.Embedding(output_size, hidden_size)
+        self.drop = nn.Dropout(0.2)
         
-        output = torch.stack(output, 1).contiguous().view(-1, 256)
-        output = self.output_layer(output)#.view(batch_size, 40, -1)
-        return output
+
+    def forward(self, input, last_out, hidden, enc_hids=None, attn=False):
+        if attn:
+            attn_w = F.softmax(self.attn(hidden[0][0])) # (b, 1, 80)
+            #score = torch.exp(torch.bmm(enc_hids, hidden[0][0].unsqueeze(-1)).squeeze()) # (b, 80, hid) * (b, hid, 1) = (b, 80, 1)
+            #attn_w = score / score.sum()
+            attn = torch.bmm(attn_w.unsqueeze(1), enc_hids).squeeze()#(b, 256)
+            h = F.tanh(self.attn_c(torch.cat((attn, hidden[0].squeeze()), -1))).unsqueeze(0)#(b, 1, hid)
+            output, hidden = self.lstm(torch.cat((input, self.drop(self.emb(last_out))), -1), (h, hidden[1]))
+        else:
+            output, hidden = self.lstm(torch.cat((input, self.drop(self.emb(last_out))), -1), hidden)
+        output = self.out(output)
+        return output, hidden
