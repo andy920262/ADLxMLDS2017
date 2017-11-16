@@ -12,7 +12,7 @@ from itertools import groupby
 
 from bleu_eval import BLEU
 
-data_dir = 'data'
+data_dir = sys.argv[1]
 epochs = 100
 batch_size = 64
 hidden_size = 512
