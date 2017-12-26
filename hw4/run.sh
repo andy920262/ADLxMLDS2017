@@ -1,1 +1,1 @@
-python3 generate.py --tag_list $1
+python3 generate.py --model --tag_list $1 --seed 37
