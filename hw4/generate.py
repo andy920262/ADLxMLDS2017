@@ -29,12 +29,12 @@ torch.manual_seed(arg.seed)
 if __name__ == '__main__':
     g_net = Generator(tag_dim, arg.noise_dim).cuda().eval()
     fd = open(arg.tag_list)
+    noise = Variable(torch.FloatTensor(arg.n_img, arg.noise_dim).uniform_(-1, 1)).cuda()
     for line in fd:
         tag_id = line.split(',')[0]
         tag = [[0 if line.split(',')[-1].find(c) == -1 else 1 for c in itoc]] * arg.n_img
         tag = np.array(tag).astype(np.float64)
         tag = Variable(torch.FloatTensor(tag)).cuda()
-        noise = Variable(torch.FloatTensor(arg.n_img, arg.noise_dim).uniform_(-1, 1)).cuda()
         if not arg.gif:
             g_net.load_state_dict(torch.load(arg.model))
             if arg.cat_img:
